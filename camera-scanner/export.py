@@ -42,6 +42,7 @@ COLUNAS = [
     ("Fabricante",  "fabricante",  16),
     ("Modelo",      "modelo",      24),
     ("MAC",         "mac",         20),
+    ("Nome",        "nome",        30),
     ("Status",      "status",      12),
     ("Observação",  "erro",        36),
 ]
@@ -69,7 +70,7 @@ def exportar_excel(cameras: Sequence[CameraInfo], nome_arquivo: str | None = Non
     ws.title = "Câmeras"
 
     # Linha de título
-    ws.merge_cells("A1:F1")
+    ws.merge_cells("A1:G1")
     titulo_cell = ws["A1"]
     titulo_cell.value = f"Camera Scanner — {datetime.now().strftime('%d/%m/%Y %H:%M')}"
     titulo_cell.font = Font(bold=True, size=13, color=_HEADER_FG)
@@ -101,8 +102,8 @@ def exportar_excel(cameras: Sequence[CameraInfo], nome_arquivo: str | None = Non
             if is_alt:
                 cell.fill = PatternFill("solid", fgColor=_ALT_ROW_BG)
 
-        # Colorir coluna Status
-        status_cell = ws.cell(row=row_idx, column=5)
+        # Colorir coluna Status (agora na coluna 6)
+        status_cell = ws.cell(row=row_idx, column=6)
         if cam.status == "OK":
             status_cell.font = Font(bold=True, color=_OK_FG)
         elif cam.status == "Erro":
@@ -111,7 +112,7 @@ def exportar_excel(cameras: Sequence[CameraInfo], nome_arquivo: str | None = Non
     # Rodapé com total
     ultimo_dado = len(cameras) + 2
     rodape_row = ultimo_dado + 2
-    ws.merge_cells(f"A{rodape_row}:F{rodape_row}")
+    ws.merge_cells(f"A{rodape_row}:G{rodape_row}")
     rodape_cell = ws.cell(row=rodape_row, column=1)
     rodape_cell.value = f"Total: {len(cameras)} câmera(s) encontrada(s)"
     rodape_cell.font = Font(italic=True, color="666666")

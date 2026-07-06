@@ -20,7 +20,8 @@ from utils import normalize_mac
 logger = logging.getLogger(__name__)
 
 _ISAPI_DEVICE = "/ISAPI/System/deviceInfo"
-_ISAPI_NET = "/ISAPI/System/Network/interfaces"
+_ISAPI_NET    = "/ISAPI/System/Network/interfaces"
+_ISAPI_CHAN   = "/ISAPI/System/Video/inputs/channels/1"
 
 # Palavras-chave encontradas nos cabeçalhos / corpo de resposta HTTP
 _MARKERS = ("hikvision", "hikv", "hik-", "ds-2", "ds-7")
@@ -75,13 +76,15 @@ class HikvisionCamera(CameraBase):
             if modelo is None:
                 return self._erro(ip, "ISAPI não respondeu ou autenticação falhou")
 
-        mac = self._get_mac(base, auth)
+        mac  = self._get_mac(base, auth)
+        nome = self._get_nome(base, auth)
 
         return CameraInfo(
             ip=ip,
             fabricante=self.FABRICANTE,
             modelo=modelo or "Desconhecido",
             mac=normalize_mac(mac or ""),
+            nome=nome or "",
             status="OK",
         )
 
@@ -102,6 +105,16 @@ class HikvisionCamera(CameraBase):
         except requests.RequestException as e:
             logger.debug("Hikvision deviceInfo falhou em %s: %s", base, e)
             return None
+
+    def _get_nome(self, base: str, auth: HTTPDigestAuth) -> str:
+        url = base + _ISAPI_CHAN
+        try:
+            resp = requests.get(url, auth=auth, timeout=self.timeout, verify=False)
+            if resp.status_code == 200:
+                return self._xml_text(resp.text, "name") or ""
+        except requests.RequestException as e:
+            logger.debug("Hikvision channel name falhou em %s: %s", base, e)
+        return ""
 
     def _get_mac(self, base: str, auth: HTTPDigestAuth) -> str:
         url = base + _ISAPI_NET

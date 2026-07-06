@@ -37,6 +37,7 @@ class CameraInfo:
             "fabricante": self.fabricante,
             "modelo": self.modelo,
             "mac": self.mac,
+            "nome": self.nome,
             "status": self.status,
             "erro": self.erro,
         }

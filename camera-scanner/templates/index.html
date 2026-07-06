@@ -575,6 +575,7 @@
             <th>Fabricante</th>
             <th>Modelo</th>
             <th>MAC</th>
+            <th>Nome</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -876,6 +877,7 @@ function adicionarLinha(cam) {
     <td>${fabricanteTag(cam.fabricante)}</td>
     <td style="color:var(--text-muted)">${cam.modelo || '—'}</td>
     <td class="td-mac">${cam.mac || '—'}</td>
+    <td style="color:var(--text)">${cam.nome || '—'}</td>
     <td>${statusBadge(cam.status, cam.erro)}</td>
   `;
   tbody.appendChild(tr);
