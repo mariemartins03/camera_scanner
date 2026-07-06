@@ -38,11 +38,11 @@ def _thin_border():
 # ---------------------------------------------------------------------------
 
 COLUNAS = [
-    ("IP",          "ip",          16),
-    ("Fabricante",  "fabricante",  16),
-    ("Modelo",      "modelo",      24),
-    ("MAC",         "mac",         20),
     ("Nome",        "nome",        30),
+    ("IP",          "ip",          16),
+    ("MAC",         "mac",         20),
+    ("Modelo",      "modelo",      24),
+    ("Fabricante",  "fabricante",  16),
     ("Status",      "status",      12),
     ("Observação",  "erro",        36),
 ]

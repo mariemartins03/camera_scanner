@@ -571,11 +571,11 @@
       <table>
         <thead>
           <tr>
-            <th>IP</th>
-            <th>Fabricante</th>
-            <th>Modelo</th>
-            <th>MAC</th>
             <th>Nome</th>
+            <th>IP</th>
+            <th>MAC</th>
+            <th>Modelo</th>
+            <th>Fabricante</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -873,11 +873,11 @@ function adicionarLinha(cam) {
   const tbody = document.getElementById('tableBody');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td class="td-ip"><strong>${cam.ip}</strong></td>
-    <td>${fabricanteTag(cam.fabricante)}</td>
-    <td style="color:var(--text-muted)">${cam.modelo || '—'}</td>
-    <td class="td-mac">${cam.mac || '—'}</td>
     <td style="color:var(--text)">${cam.nome || '—'}</td>
+    <td class="td-ip"><strong>${cam.ip}</strong></td>
+    <td class="td-mac">${cam.mac || '—'}</td>
+    <td style="color:var(--text-muted)">${cam.modelo || '—'}</td>
+    <td>${fabricanteTag(cam.fabricante)}</td>
     <td>${statusBadge(cam.status, cam.erro)}</td>
   `;
   tbody.appendChild(tr);
