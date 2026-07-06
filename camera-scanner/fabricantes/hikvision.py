@@ -35,12 +35,26 @@ class HikvisionCamera(CameraBase):
     def detectar(self, ip: str, timeout: int | None = None) -> bool:
         t = timeout or self.timeout
         for porta in (80, 8080, 443):
-            url = f"http://{ip}:{porta}/"
+            # Estratégia 1: bate no endpoint ISAPI sem auth — Hikvision devolve 401 Digest
+            isapi_url = f"http://{ip}:{porta}{_ISAPI_DEVICE}"
             try:
-                resp = requests.get(url, timeout=t, verify=False, allow_redirects=True)
+                resp = requests.get(isapi_url, timeout=t, verify=False, allow_redirects=False)
+                if resp.status_code == 401:
+                    auth_header = resp.headers.get("WWW-Authenticate", "").lower()
+                    if "digest" in auth_header:
+                        logger.debug("Hikvision detectada via ISAPI 401 em %s:%s", ip, porta)
+                        return True
+            except requests.RequestException:
+                pass
+
+            # Estratégia 2: verifica markers na página raiz (fallback)
+            try:
+                resp = requests.get(
+                    f"http://{ip}:{porta}/", timeout=t, verify=False, allow_redirects=True
+                )
                 text = (resp.text + " ".join(str(v) for v in resp.headers.values())).lower()
                 if any(m in text for m in _MARKERS):
-                    logger.debug("Hikvision detectada em %s:%s", ip, porta)
+                    logger.debug("Hikvision detectada via markers em %s:%s", ip, porta)
                     return True
             except requests.RequestException:
                 continue
