@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camera Scanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0D1117;
+      --surface:      #161B22;
+      --surface-2:    #1C2230;
+      --border:       #2A3344;
+      --border-bright:#3D4F66;
+      --accent:       #3B82F6;
+      --accent-dim:   #1D3557;
+      --accent-glow:  rgba(59,130,246,0.15);
+      --green:        #22C55E;
+      --red:          #EF4444;
+      --amber:        #F59E0B;
+      --text:         #E6EDF3;
+      --text-muted:   #7D8FA3;
+      --text-subtle:  #4A5568;
+      --mono:         'JetBrains Mono', monospace;
+      --sans:         'Inter', sans-serif;
+      --radius:       8px;
+      --radius-lg:    12px;
+      --shadow:       0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: grid; place-items: center;
+      color: #fff; font-size: 16px;
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .header-badge {
+      margin-left: auto;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 2px 8px;
+      border-radius: 99px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Layout ───────────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* ── Card ─────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title i { font-size: 0.85rem; }
+
+    /* ── Formulário ───────────────────────────────────────── */
+    .scan-form { display: flex; flex-direction: column; gap: 1rem; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    .field input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      padding: 0.55rem 0.75rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .field input::placeholder { color: var(--text-subtle); }
+    .field input.error { border-color: var(--red); }
+
+    /* ── Botões ───────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #2563EB;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(59,130,246,0.4);
+    }
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--border-bright);
+      background: var(--border);
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.4);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239,68,68,0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Progresso ────────────────────────────────────────── */
+    #progress-area {
+      display: none;
+      margin-top: 1.5rem;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .progress-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .progress-count {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .progress-bar-wrap {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #60A5FA);
+      border-radius: 99px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .progress-status {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      font-family: var(--mono);
+      min-height: 1.2em;
+    }
+
+    /* ── Separador ────────────────────────────────────────── */
+    .section-sep {
+      margin: 1.75rem 0;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Toolbar resultados ───────────────────────────────── */
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .results-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      flex: 1;
+    }
+    .results-count strong {
+      color: var(--text);
+    }
+
+    /* ── Tabela ───────────────────────────────────────────── */
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: none;
+    }
+    .table-wrap.visible { display: block; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.825rem;
+    }
+    thead {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+    }
+    thead th {
+      padding: 0.65rem 1rem;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-2); }
+    tbody td {
+      padding: 0.65rem 1rem;
+      vertical-align: middle;
+    }
+    .td-ip, .td-mac {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .td-ip strong { color: var(--text); }
+
+    /* ── Badge status ─────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .badge-ok    { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-erro  { background: rgba(239,68,68,0.12); color: var(--red); }
+    .badge-unk   { background: rgba(245,158,11,0.12); color: var(--amber); }
+    .badge i { font-size: 0.6rem; }
+
+    /* ── Fabricante ───────────────────────────────────────── */
+    .fab-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .fab-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .fab-hikvision .fab-dot { background: #3B82F6; }
+    .fab-dahua .fab-dot     { background: #A855F7; }
+    .fab-intelbras .fab-dot { background: #F59E0B; }
+    .fab-desconhecido .fab-dot { background: var(--text-subtle); }
+
+    /* ── Empty state ──────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-subtle);
+      display: none;
+    }
+    .empty-state.visible { display: block; }
+    .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 1rem; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── Toast / Alerta ───────────────────────────────────── */
+    #toast-area {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 9999;
+    }
+    .toast {
+      padding: 0.75rem 1.1rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 500;
+      min-width: 260px;
+      max-width: 380px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      animation: slideIn 0.25s ease;
+    }
+    .toast-error  { border-color: rgba(239,68,68,0.5); color: var(--red); }
+    .toast-success { border-color: rgba(34,197,94,0.5); color: var(--green); }
+    .toast-info   { border-color: rgba(59,130,246,0.5); color: var(--accent); }
+    @keyframes slideIn { from { transform: translateX(40px); opacity:0; } to { transform: none; opacity:1; } }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 0.9rem 2rem;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+    }
+
+    /* ── Spinner ──────────────────────────────────────────── */
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Abas de modo ─────────────────────────────────────── */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 1.25rem;
+    }
+    .mode-tab {
+      flex: 1;
+      padding: 0.45rem 0.75rem;
+      border: none;
+      border-radius: calc(var(--radius) - 2px);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .mode-tab.active {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border-bright);
+    }
+    .mode-tab:not(.active):hover { color: var(--text); }
+
+    /* ── Upload CSV ───────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .drop-zone-icon { font-size: 1.8rem; color: var(--text-subtle); margin-bottom: 0.5rem; display: block; }
+    .drop-zone-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .drop-zone-hint  { font-size: 0.75rem; color: var(--text-subtle); margin-top: 4px; }
+    .drop-zone.has-file { border-color: var(--green); background: rgba(34,197,94,0.05); }
+    .drop-zone.has-file .drop-zone-icon { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon"><i class="bi bi-camera-video-fill"></i></div>
+  <h1>Camera Scanner</h1>
+  <span class="header-badge">MVP v1.0</span>
+</header>
+
+<div class="container">
+
+  <!-- Formulário -->
+  <div class="card">
+    <div class="card-title"><i class="bi bi-search"></i> Configurar Varredura</div>
+
+    <!-- Seletor de modo -->
+    <div class="mode-tabs" role="tablist">
+      <button class="mode-tab active" id="tabFaixa" role="tab" onclick="trocarModo('faixa')">
+        <i class="bi bi-hdd-network"></i> Faixa de IPs
+      </button>
+      <button class="mode-tab" id="tabCsv" role="tab" onclick="trocarModo('csv')">
+        <i class="bi bi-file-earmark-spreadsheet"></i> Importar CSV
+      </button>
+    </div>
+
+    <!-- Modo: Faixa de IPs -->
+    <form class="scan-form" id="scanForm" novalidate>
+      <div class="form-row">
+        <div class="field">
+          <label for="ip_inicio">IP Inicial</label>
+          <input type="text" id="ip_inicio" name="ip_inicio" placeholder="192.168.1.1" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="ip_fim">IP Final</label>
+          <input type="text" id="ip_fim" name="ip_fim" placeholder="192.168.1.254" autocomplete="off" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="usuario">Usuário</label>
+          <input type="text" id="usuario" name="usuario" placeholder="admin" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="btnScan">
+          <i class="bi bi-play-fill"></i> Buscar câmeras
+        </button>
+        <button type="button" class="btn btn-danger" id="btnStop" style="display:none">
+          <i class="bi bi-stop-fill"></i> Cancelar
+        </button>
+      </div>
+    </form>
+
+    <!-- Modo: Importar CSV -->
+    <form class="scan-form" id="csvForm" novalidate style="display:none">
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="csvFile" accept=".csv,.txt" />
+        <i class="bi bi-cloud-upload drop-zone-icon"></i>
+        <div class="drop-zone-label">Clique ou arraste o arquivo CSV aqui</div>
+        <div class="drop-zone-hint">Uma coluna com os IPs das câmeras · .csv ou .txt</div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label for="csv_usuario">Usuário</label>
+          <input type="text" id="csv_usuario" name="csv_usuario" placeholder="admin" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="csv_senha">Senha</label>
+          <input type="password" id="csv_senha" name="csv_senha" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="btnScanCsv">
+          <i class="bi bi-play-fill"></i> Buscar câmeras
+        </button>
+        <button type="button" class="btn btn-danger" id="btnStopCsv" style="display:none">
+          <i class="bi bi-stop-fill"></i> Cancelar
+        </button>
+      </div>
+    </form>
+
+    <!-- Progresso -->
+    <div id="progress-area">
+      <hr class="section-sep" style="margin-top:1.25rem; margin-bottom:1rem;" />
+      <div class="progress-header">
+        <span class="progress-label">Varrendo rede…</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-status" id="progressStatus">Iniciando…</div>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div id="resultsSection" style="margin-top:1.5rem; display:none;">
+    <div class="results-toolbar">
+      <div class="results-count" id="resultsCount">
+        <strong>0</strong> câmera(s) encontrada(s)
+      </div>
+      <button class="btn btn-secondary" id="btnExport" disabled>
+        <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+      </button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrap" id="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>MAC</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Empty state (nenhuma câmera) -->
+    <div class="empty-state" id="emptyState">
+      <i class="bi bi-camera-video-off"></i>
+      <p>Nenhuma câmera identificada na faixa informada.</p>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>Camera Scanner © 2025 — MVP v1.0</footer>
+
+<!-- Toast área -->
+<div id="toast-area"></div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────────
+   Estado global
+───────────────────────────────────────────────────────────────── */
+let eventSource = null;
+let sessonId = null;
+let cameras = [];
+let modoAtual = 'faixa'; // 'faixa' | 'csv'
+let csvReader = null;    // AbortController para cancelar stream CSV
+
+/* ─────────────────────────────────────────────────────────────────
+   Troca de modo (abas)
+───────────────────────────────────────────────────────────────── */
+function trocarModo(modo) {
+  modoAtual = modo;
+  document.getElementById('tabFaixa').classList.toggle('active', modo === 'faixa');
+  document.getElementById('tabCsv').classList.toggle('active', modo === 'csv');
+  document.getElementById('scanForm').style.display = modo === 'faixa' ? '' : 'none';
+  document.getElementById('csvForm').style.display  = modo === 'csv'   ? '' : 'none';
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Drop zone CSV
+───────────────────────────────────────────────────────────────── */
+const dropZone = document.getElementById('dropZone');
+const csvFile  = document.getElementById('csvFile');
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) {
+    csvFile.files = e.dataTransfer.files;
+    atualizarDropZone(e.dataTransfer.files[0].name);
+  }
+});
+csvFile.addEventListener('change', () => {
+  if (csvFile.files.length) atualizarDropZone(csvFile.files[0].name);
+});
+
+function atualizarDropZone(nome) {
+  dropZone.classList.add('has-file');
+  dropZone.querySelector('.drop-zone-icon').className = 'bi bi-file-earmark-check drop-zone-icon';
+  dropZone.querySelector('.drop-zone-label').textContent = nome;
+  dropZone.querySelector('.drop-zone-hint').textContent = 'Arquivo selecionado — clique para trocar';
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Form submit — Faixa de IPs
+───────────────────────────────────────────────────────────────── */
+document.getElementById('scanForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  iniciarVarredura();
+});
+
+document.getElementById('btnStop').addEventListener('click', () => cancelarVarredura());
+document.getElementById('btnStopCsv').addEventListener('click', () => cancelarVarredura());
+document.getElementById('btnExport').addEventListener('click', () => exportar());
+
+/* ─────────────────────────────────────────────────────────────────
+   Form submit — CSV
+───────────────────────────────────────────────────────────────── */
+document.getElementById('csvForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  iniciarVarreduraCsv();
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   Varredura — Faixa de IPs
+───────────────────────────────────────────────────────────────── */
+async function iniciarVarredura() {
+  const ipInicio = document.getElementById('ip_inicio').value.trim();
+  const ipFim    = document.getElementById('ip_fim').value.trim();
+  const usuario  = document.getElementById('usuario').value.trim();
+  const senha    = document.getElementById('senha').value;
+
+  const campos = { ip_inicio: ipInicio, ip_fim: ipFim, usuario, senha };
+  let ok = true;
+  for (const [nome, val] of Object.entries(campos)) {
+    if (!val) { document.getElementById(nome)?.classList.add('error'); ok = false; }
+    else        document.getElementById(nome)?.classList.remove('error');
+  }
+  if (!ok) { toast('Preencha todos os campos', 'error'); return; }
+
+  cameras = [];
+  sessonId = null;
+  resetarTabela();
+  setEstadoVarrendo(true);
+
+  try {
+    const resp = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ip_inicio: ipInicio, ip_fim: ipFim, usuario, senha }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      toast(err.erro || 'Erro ao iniciar varredura', 'error');
+      setEstadoVarrendo(false);
+      return;
+    }
+
+    await lerStream(resp);
+  } catch (err) {
+    toast('Conexão interrompida: ' + err.message, 'error');
+  } finally {
+    setEstadoVarrendo(false);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Varredura — CSV
+───────────────────────────────────────────────────────────────── */
+async function iniciarVarreduraCsv() {
+  const arquivo = csvFile.files[0];
+  const usuario = document.getElementById('csv_usuario').value.trim();
+  const senha   = document.getElementById('csv_senha').value;
+
+  if (!arquivo) { toast('Selecione um arquivo CSV', 'error'); return; }
+  if (!usuario) { document.getElementById('csv_usuario').classList.add('error'); toast('Preencha todos os campos', 'error'); return; }
+  else            document.getElementById('csv_usuario').classList.remove('error');
+  if (!senha)   { document.getElementById('csv_senha').classList.add('error'); toast('Preencha todos os campos', 'error'); return; }
+  else            document.getElementById('csv_senha').classList.remove('error');
+
+  cameras = [];
+  sessonId = null;
+  resetarTabela();
+  setEstadoVarrendo(true);
+
+  const formData = new FormData();
+  formData.append('arquivo', arquivo);
+  formData.append('usuario', usuario);
+  formData.append('senha', senha);
+
+  try {
+    const resp = await fetch('/api/scan-lista', { method: 'POST', body: formData });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      toast(err.erro || 'Erro ao iniciar varredura', 'error');
+      setEstadoVarrendo(false);
+      return;
+    }
+
+    await lerStream(resp);
+  } catch (err) {
+    toast('Conexão interrompida: ' + err.message, 'error');
+  } finally {
+    setEstadoVarrendo(false);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Leitura do stream SSE (compartilhada)
+───────────────────────────────────────────────────────────────── */
+async function lerStream(resp) {
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const linhas = buffer.split('\n\n');
+    buffer = linhas.pop();
+
+    for (const bloco of linhas) {
+      const linha = bloco.replace(/^data:\s?/, '').trim();
+      if (!linha) continue;
+      try { processarEvento(JSON.parse(linha)); } catch (_) {}
+    }
+  }
+}
+
+function processarEvento(msg) {
+  switch (msg.tipo) {
+    case 'inicio':
+      sessonId = msg.sessao_id;
+      atualizarProgresso(0, msg.total);
+      break;
+
+    case 'camera':
+      cameras.push(msg.camera);
+      adicionarLinha(msg.camera);
+      atualizarContador();
+      break;
+
+    case 'progresso':
+      atualizarProgresso(msg.concluidos, msg.total);
+      document.getElementById('progressStatus').textContent =
+        `Verificando IPs… ${msg.percentual}% concluído`;
+      break;
+
+    case 'fim':
+      sessonId = msg.sessao_id;
+      atualizarProgresso(msg.total_ips, msg.total_ips);
+      document.getElementById('progressStatus').textContent =
+        `Concluído em ${msg.duracao}s — ${msg.encontradas} câmera(s) identificada(s)`;
+      finalizarVarredura(msg);
+      break;
+  }
+}
+
+function cancelarVarredura() {
+  if (eventSource) { eventSource.close(); eventSource = null; }
+  setEstadoVarrendo(false);
+  toast('Varredura cancelada', 'info');
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UI helpers
+───────────────────────────────────────────────────────────────── */
+function setEstadoVarrendo(varrendo) {
+  const btnLabel = varrendo
+    ? '<i class="bi bi-arrow-repeat spin"></i> Varrendo…'
+    : '<i class="bi bi-play-fill"></i> Buscar câmeras';
+
+  document.getElementById('btnScan').disabled = varrendo;
+  document.getElementById('btnScan').innerHTML = btnLabel;
+  document.getElementById('btnStop').style.display = varrendo && modoAtual === 'faixa' ? 'inline-flex' : 'none';
+
+  document.getElementById('btnScanCsv').disabled = varrendo;
+  document.getElementById('btnScanCsv').innerHTML = btnLabel;
+  document.getElementById('btnStopCsv').style.display = varrendo && modoAtual === 'csv' ? 'inline-flex' : 'none';
+
+  document.getElementById('progress-area').style.display = varrendo ? 'block' : (sessonId ? 'block' : 'none');
+  if (varrendo) document.getElementById('resultsSection').style.display = 'block';
+}
+
+function atualizarProgresso(atual, total) {
+  const pct = total > 0 ? Math.round(atual / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = `${atual} / ${total}`;
+}
+
+function atualizarContador() {
+  const n = cameras.length;
+  document.getElementById('resultsCount').innerHTML =
+    `<strong>${n}</strong> câmera(s) encontrada(s)`;
+}
+
+function finalizarVarredura(msg) {
+  atualizarContador();
+  document.getElementById('btnExport').disabled = cameras.length === 0;
+  document.getElementById('tableWrap').classList.toggle('visible', cameras.length > 0);
+  document.getElementById('emptyState').classList.toggle('visible', cameras.length === 0);
+  if (cameras.length > 0) {
+    toast(`${cameras.length} câmera(s) encontrada(s) em ${msg.duracao}s`, 'success');
+  } else {
+    toast('Nenhuma câmera identificada na faixa informada', 'info');
+  }
+}
+
+function resetarTabela() {
+  document.getElementById('tableBody').innerHTML = '';
+  document.getElementById('tableWrap').classList.remove('visible');
+  document.getElementById('emptyState').classList.remove('visible');
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('btnExport').disabled = true;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressCount').textContent = '0 / 0';
+  document.getElementById('progressStatus').textContent = 'Iniciando…';
+  atualizarContador();
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Tabela
+───────────────────────────────────────────────────────────────── */
+function adicionarLinha(cam) {
+  const tbody = document.getElementById('tableBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="td-ip"><strong>${cam.ip}</strong></td>
+    <td>${fabricanteTag(cam.fabricante)}</td>
+    <td style="color:var(--text-muted)">${cam.modelo || '—'}</td>
+    <td class="td-mac">${cam.mac || '—'}</td>
+    <td>${statusBadge(cam.status, cam.erro)}</td>
+  `;
+  tbody.appendChild(tr);
+  document.getElementById('tableWrap').classList.add('visible');
+}
+
+function fabricanteTag(fab) {
+  const slug = (fab || 'desconhecido').toLowerCase();
+  return `<span class="fab-tag fab-${slug}">
+    <span class="fab-dot"></span>${fab || 'Desconhecido'}
+  </span>`;
+}
+
+function statusBadge(status, erro) {
+  if (status === 'OK')
+    return `<span class="badge badge-ok"><i class="bi bi-check-circle-fill"></i> OK</span>`;
+  if (status === 'Erro')
+    return `<span class="badge badge-erro" title="${erro || ''}"><i class="bi bi-x-circle-fill"></i> Erro</span>`;
+  return `<span class="badge badge-unk"><i class="bi bi-question-circle-fill"></i> ${status}</span>`;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Exportação
+───────────────────────────────────────────────────────────────── */
+async function exportar() {
+  if (!sessonId) { toast('Nenhuma sessão ativa', 'error'); return; }
+  toast('Gerando Excel…', 'info');
+  const url = `/api/export/${sessonId}`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Toast
+───────────────────────────────────────────────────────────────── */
+function toast(msg, tipo = 'info') {
+  const icons = { error: 'bi-x-circle', success: 'bi-check-circle', info: 'bi-info-circle' };
+  const el = document.createElement('div');
+  el.className = `toast toast-${tipo}`;
+  el.innerHTML = `<i class="bi ${icons[tipo] || icons.info}"></i> ${msg}`;
+  document.getElementById('toast-area').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+</script>
+</body>
+</html>

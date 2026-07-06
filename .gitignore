@@ -1,0 +1,31 @@
+# Arquivos de planejamento e rascunho (raiz do projeto)
+\# Projeto Camera Scanner.txt
+\# Projeto Camera Scanner ## Objetiv.txt V1.txt
+claude.txt
+
+# Gerados pela aplicação
+camera-scanner/exports/
+camera-scanner/logs/
+camera-scanner/*.db
+
+# CSV com IPs de testes reais
+*.csv
+
+# Ambiente virtual Python
+.venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Variáveis de ambiente
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+*.code-workspace
