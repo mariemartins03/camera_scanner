@@ -294,6 +294,16 @@ def exportar(sessao_id: str):
         return jsonify({"erro": "Sessão não encontrada ou expirada"}), 404
 
     cameras = sessao["resultados"]
+
+    # Reordena pelo arquivo original (CSV) ou por IP numérico (faixa)
+    ordem_original = sessao.get("ips")
+    if ordem_original:
+        indice = {ip: i for i, ip in enumerate(ordem_original)}
+        cameras = sorted(cameras, key=lambda c: indice.get(c.ip, len(ordem_original)))
+    else:
+        import ipaddress
+        cameras = sorted(cameras, key=lambda c: int(ipaddress.IPv4Address(c.ip)))
+
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     nome = f"cameras_{ts}.xlsx"
 
