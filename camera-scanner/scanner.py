@@ -153,7 +153,7 @@ def _processar_ip(ip: str, usuario: str, senha: str) -> Optional[CameraInfo]:
     porta_ativa = _encontrar_porta(ip)
     if porta_ativa is None:
         logger.debug("Host inacessível: %s", ip)
-        return None
+        return CameraInfo(ip=ip, status="Offline", erro="Host inacessível")
 
     logger.info("Host ativo: %s (porta %d)", ip, porta_ativa)
 

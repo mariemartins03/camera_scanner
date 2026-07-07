@@ -160,9 +160,13 @@ def scan():
                 "ip_fim": ip_fim,
             }
 
+        online  = sum(1 for r in resultados if r.status != "Offline")
+        offline = sum(1 for r in resultados if r.status == "Offline")
+
         yield _sse("fim", {
             "total_ips": total,
-            "encontradas": len(resultados),
+            "encontradas": online,
+            "offline": offline,
             "duracao": duracao,
             "sessao_id": sessao_id,
         })
@@ -267,9 +271,13 @@ def scan_lista():
                 "ips": ips,
             }
 
+        online  = sum(1 for r in resultados if r.status != "Offline")
+        offline = sum(1 for r in resultados if r.status == "Offline")
+
         yield _sse("fim", {
             "total_ips": total,
-            "encontradas": len(resultados),
+            "encontradas": online,
+            "offline": offline,
             "duracao": duracao,
             "sessao_id": sessao_id,
         })
